@@ -1,4 +1,4 @@
-chugins
-=======
+MAUI
+====
 
-Repository for ChuGins
+Standalone miniAudicle User Interface chugin. 
