@@ -40,10 +40,14 @@
 
 #include "chuck_dl.h"
 
+// forward reference; REFACTOR-2017
+struct Chuck_Carrier;
 
 // query
 DLL_QUERY stk_query( Chuck_DL_Query * QUERY );
-t_CKBOOL  stk_detach( t_CKUINT type, void * data );
+t_CKBOOL  stk_detach( Chuck_Carrier * carrier );
+
+
 
 
 // this determines STK float type and de-denormal method
@@ -54,6 +58,8 @@ t_CKBOOL  stk_detach( t_CKUINT type, void * data );
 #define MY_FLOAT float
 #define CK_STK_DDN CK_DDN_SINGLE
 #endif
+
+
 
 
 /***************************************************/
@@ -5409,17 +5415,12 @@ class WvOut : public Stk
   static const FILE_TYPE WVOUT_AIF; /*!< AIFF file type. */
   static const FILE_TYPE WVOUT_MAT; /*!< Matlab MAT-file type. */
 
-    // chuck: asynchronous data writer thread
-    static XWriteThread * s_writeThread;
-    
     // chuck: override stdio fwrite/etc. functions
     size_t fwrite(const void * ptr, size_t size, size_t nitems, FILE * stream);
     int fseek(FILE *stream, long offset, int whence);
     int fflush(FILE *stream);
     int fclose(FILE *stream);
     size_t fread(void *ptr, size_t size, size_t nitems, FILE *stream);
-    
-    static void shutdown();
     
   //! Default constructor.
   WvOut();
@@ -5518,7 +5519,9 @@ class WvOut : public Stk
   t_CKUINT flush;
   t_CKFLOAT fileGain;
     
-    t_CKBOOL asyncIO;
+  // spencer: for data asynch write
+  t_CKBOOL asyncIO;
+  XWriteThread * asyncWriteThread;
 };
 
 #endif // defined(__WVOUT_H)
@@ -6394,10 +6397,10 @@ public:
     ~MidiFileIn();
     
     //! Return the MIDI file format (0, 1, or 2).
-    int getFileFormat() const { return format_; };
+    int getFileFormat() const;
     
     //! Return the number of tracks in the MIDI file.
-    unsigned int getNumberOfTracks() const { return nTracks_; };
+    unsigned int getNumberOfTracks() const;
     
     //! Return the MIDI file division value from the file header.
     /*!
@@ -6405,7 +6408,7 @@ public:
      MIDI File Specification.  In particular, if the MSB is set, the
      file uses time-code representations for delta-time values.
      */
-    int getDivision() const { return division_; };
+    int getDivision() const;
     
     //! Move the specified track event reader to the beginning of its track.
     /*!
@@ -6452,6 +6455,13 @@ public:
      */
     unsigned long getNextMidiEvent( std::vector<unsigned char> *midiEvent, unsigned int track = 0 );
     
+    //! ge: get the current BPM (I think)
+    /*!
+     This value can change as events are read... hmm pretty much
+     what it says above for getTickSeconds()
+     */
+    double getBPM();
+    
 protected:
     
     // This protected class function is used for reading variable-length
@@ -6471,6 +6481,8 @@ protected:
     std::vector<long> trackOffsets_;
     std::vector<long> trackLengths_;
     std::vector<char> trackStatus_;
+    // ge:
+    double bpm_;
     
     // This structure and the following variables are used to save and
     // keep track of a format 1 tempo map (and the initial tickSeconds
