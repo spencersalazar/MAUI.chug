@@ -1,11 +1,11 @@
 
-ARCHS?=i386 x86_64
+ARCHS?=x86_64
 ARCHOPTS=$(addprefix -arch ,$(ARCHS))
 
 FRAMEWORKS=Cocoa Foundation
 
-FLAGS+=-D__MACOSX_CORE__ -D__MAUI_CHUGIN__ $(ARCHOPTS)
-LDFLAGS+=-shared -lstdc++ $(addprefix -framework ,$(FRAMEWORKS)) \
+FLAGS+=-D__MACOSX_CORE__ -D__MAUI_CHUGIN__ $(ARCHOPTS) -lc++ 
+LDFLAGS+=-shared $(addprefix -framework ,$(FRAMEWORKS)) \
 -ObjC $(ARCHOPTS) \
 -Wl,-undefined,dynamic_lookup
 
@@ -13,5 +13,5 @@ LD=clang++
 CXX=clang++
 OBJCXX=clang++
 
-MACOSX_DEPLOYMENT_TARGET=10.5
+MACOSX_DEPLOYMENT_TARGET=10.9
 export MACOSX_DEPLOYMENT_TARGET

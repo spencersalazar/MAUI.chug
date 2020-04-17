@@ -108,7 +108,7 @@ public:
     virtual t_CKBOOL hide();
     virtual t_CKBOOL destroy();
     
-    virtual t_CKBOOL set_name( std::string & name );
+    virtual t_CKBOOL set_name( const std::string & name );
     virtual std::string get_name();
     
     virtual t_CKBOOL set_parent( View * p );
@@ -137,7 +137,7 @@ public:
     virtual t_CKBOOL pi_display();
     virtual t_CKBOOL pi_hide();
     virtual t_CKBOOL pi_destroy();
-    virtual t_CKBOOL pi_set_name( std::string & name );    
+    virtual t_CKBOOL pi_set_name( const std::string & name );    
     virtual t_CKBOOL pi_set_parent( View * p );
     virtual t_CKBOOL pi_remove_parent( View * p );    
     virtual t_CKBOOL pi_set_size( t_CKFLOAT w, t_CKFLOAT h );
@@ -272,7 +272,7 @@ public:
     virtual action_type get_action_type();
     
     virtual t_CKBOOL unset_image();
-    virtual t_CKBOOL set_image( std::string & path );
+    virtual t_CKBOOL set_image( const std::string & path );
      
     /* enum text_position
      {
@@ -425,7 +425,7 @@ class Image : public Element
 public:
     virtual t_CKBOOL init();
  
-    virtual t_CKBOOL set_image( std::string & filename );
+    virtual t_CKBOOL set_image(const std::string & filename );
     virtual std::string get_image();
         
 private:
