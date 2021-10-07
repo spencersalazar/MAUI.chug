@@ -180,7 +180,7 @@ public:
 
 public:
     // output type info (can be overriden; but probably shouldn't be)
-    virtual void help();
+    virtual void apropos();
     
 public:
     // virtual table
