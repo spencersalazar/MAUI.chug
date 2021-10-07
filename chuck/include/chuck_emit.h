@@ -61,6 +61,8 @@ public:
     t_CKUINT stack_depth;
     // need this
     t_CKBOOL need_this;
+    // is static (in class def) | 1.4.1.0 (ge) added
+    t_CKBOOL is_static;
     // frame
     Chuck_Frame * frame;
     // code
@@ -81,6 +83,7 @@ public:
     {
         stack_depth = 0;
         need_this = FALSE;
+        is_static = FALSE; // 1.4.1.0 (ge) added
         frame = new Chuck_Frame;
     }
 
@@ -120,7 +123,8 @@ struct Chuck_Emitter : public Chuck_VM_Object
     // constructor
     Chuck_Emitter()
     { env = NULL; code = NULL; context = NULL; 
-      nspc = NULL; func = NULL; dump = FALSE; }
+      nspc = NULL; func = NULL; dump = FALSE;
+      should_replace_dac = FALSE; }
 
     // destructor
     ~Chuck_Emitter()
@@ -148,6 +152,10 @@ struct Chuck_Emitter : public Chuck_VM_Object
 
     // default durations
     t_CKBOOL find_dur( const std::string & name, t_CKDUR * out );
+    
+    // post REFACTOR-2017: replace-dac
+    std::string dac_replacement;
+    t_CKBOOL should_replace_dac;
 };
 
 

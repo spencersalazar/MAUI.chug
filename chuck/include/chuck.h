@@ -40,13 +40,27 @@
 #include "chuck_compile.h"
 #include "chuck_dl.h"
 #include "chuck_vm.h"
+
+#ifndef __DISABLE_SHELL__
 #include "chuck_shell.h"
+#endif
+
 #include "chuck_carrier.h"
+#ifndef __DISABLE_OTF_SERVER
 #include "ulib_machine.h"
+#endif
+
 #include "util_math.h"
 #include "util_string.h"
+
+#ifndef __DISABLE_HID__
 #include "hidio_sdl.h"
+#endif
+
+#ifndef __DISABLE_MIDI__
 #include "midiio_rtmidi.h"
+#endif
+
 #include <string>
 #include <map>
 
@@ -117,7 +131,7 @@ public:
 
 public:
     // is initialized
-    bool running() { return m_init; }
+    bool isInit() { return m_init; }
     
 public:
     // additional native chuck bindings/types (use with extra caution)
@@ -128,22 +142,19 @@ public:
     Chuck_DL_MainThreadHook * getMainThreadHook();
 
 public:
+    // get globals (needed to access Globals Manager)
+    Chuck_Globals_Manager * globals();
+
+public:
     // get VM (dangerous)
     Chuck_VM * vm() { return m_carrier->vm; }
     // get compiler (dangerous)
     Chuck_Compiler * compiler() { return m_carrier->compiler; }
+    // is the VM running
+    bool vm_running() { return m_carrier->vm && m_carrier->vm->running(); }
 
 public:
-    // global variables - set and get
-    t_CKBOOL setGlobalInt( const char * name, t_CKINT val );
-    t_CKBOOL getGlobalInt( const char * name, void (* callback)(t_CKINT) );
-    t_CKBOOL setGlobalFloat( const char * name, t_CKFLOAT val );
-    t_CKBOOL getGlobalFloat( const char * name, void (* callback)(t_CKFLOAT) );
-    t_CKBOOL signalGlobalEvent( const char * name );
-    t_CKBOOL broadcastGlobalEvent( const char * name );
-    
-public:
-    // global callback functions
+    // global callback functions: replace printing to command line with a callback function
     t_CKBOOL setChoutCallback( void (* callback)(const char *) );
     t_CKBOOL setCherrCallback( void (* callback)(const char *) );
     static t_CKBOOL setStdoutCallback( void (* callback)(const char *) );
@@ -160,12 +171,16 @@ public:
 protected:
     // shutdown
     bool shutdown();
-    
+
 public: // static functions
     // chuck version
     static const char * version();
+    #ifndef __DISABLE_OTF_SERVER__
     // chuck int size (in bits)
+    // (this depends on machine, which depends on OTF, so
+    //  disable it if we don't have OTF)
     static t_CKUINT intSize();
+    #endif
     // number of ChucK's
     static t_CKUINT numVMs() { return o_numVMs; };
     // --poop compatibilty
@@ -204,6 +219,8 @@ protected:
     std::map< std::string, std::list<std::string> > m_listParams;
     // did user init?
     t_CKBOOL m_init;
+    // did user start?
+    t_CKBOOL m_started;
     // main thread "hook" (if there is a main thread)
     Chuck_DL_MainThreadHook * m_hook;
 };
