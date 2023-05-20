@@ -19,7 +19,7 @@ CK_SRC_PATH?=chuck/include/
 # default target: print usage message and quit
 current: 
 	@echo "[chuck build]: please use one of the following configurations:"
-	@echo "   make linux, make osx, or make win32"
+	@echo "   make linux, make mac, make mac-ub, or make win32"
 
 ifneq ($(CK_TARGET),)
 .DEFAULT_GOAL:=$(CK_TARGET)
@@ -28,8 +28,8 @@ MAKECMDGOALS:=$(.DEFAULT_GOAL)
 endif
 endif
 
-.PHONY: osx linux linux-oss linux-jack linux-alsa win32
-osx linux linux-oss linux-jack linux-alsa win32: all
+.PHONY: mac mac-ub linux linux-oss linux-jack linux-alsa win32
+mac mac-ub linux linux-oss linux-jack linux-alsa win32: all
 
 CC=gcc
 CXX=g++
@@ -38,8 +38,12 @@ LD=g++
 
 CHUGIN_PATH=/usr/lib/chuck
 
-ifneq (,$(strip $(filter osx bin-dist-osx,$(MAKECMDGOALS))))
-include makefile.osx
+ifneq (,$(strip $(filter mac bin-dist-mac,$(MAKECMDGOALS))))
+include makefile.mac
+endif
+
+ifneq (,$(strip $(filter mac-ub bin-dist-mac,$(MAKECMDGOALS))))
+include makefile.mac-ub
 endif
 
 ifneq (,$(strip $(filter linux,$(MAKECMDGOALS))))
@@ -115,5 +119,5 @@ install: $(CHUG)
 	chmod 755 $(CHUGIN_PATH)/$(CHUG)
 
 clean: 
-	rm -rf $(C_OBJECTS) $(CXX_OBJECTS) $(CHUG)
+	rm -rf $(C_OBJECTS) $(CXX_OBJECTS) $(OBJCXX_OBJECTS) $(CHUG)
 
