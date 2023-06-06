@@ -138,10 +138,10 @@ static t_CKINT mauielement_offset_data = 0;
 //-----------------------------------------------------------------------------
 t_CKBOOL init_maui( Chuck_DL_Query * QUERY )
 {
-    // log
-    EM_log( CK_LOG_SEVERE, "loading miniAudicle UI (MAUI) API..." );
     // push indent level
     EM_pushlog();
+    // log
+    EM_log( CK_LOG_INFO, "loading miniAudicle UI (MAUI) API..." );
 
     // go
     //EM_log( CK_LOG_SEVERE, "module MAUI_Element..." );    

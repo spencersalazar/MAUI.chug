@@ -37,7 +37,6 @@
 #include <memory.h>
 #include <assert.h>
 
-
 // types
 #ifndef __EMSCRIPTEN__
 #define t_CKTIME                    double
@@ -154,6 +153,8 @@ typedef struct { SAMPLE re ; SAMPLE im ; } t_CKCOMPLEX_SAMPLE;
 #define SAFE_RELEASE(x)             do { if(x){ x->release(); x = NULL; } } while(0)
 #define SAFE_ADD_REF(x)             do { if(x){ x->add_ref(); } } while(0)
 #define SAFE_REF_ASSIGN(lhs,rhs)    do { SAFE_RELEASE(lhs); (lhs) = (rhs); SAFE_ADD_REF(lhs); } while(0)
+#define SAFE_FREE(x)                do { if(x){ free(x); x = NULL; } } while(0)
+#define SAFE_UNLOCK_DELETE(x)       do { if(x){ x->unlock(); delete x; x = NULL; } } while(0)
 #endif
 
 // max + min
@@ -191,8 +192,13 @@ typedef struct { SAMPLE re ; SAMPLE im ; } t_CKCOMPLEX_SAMPLE;
 
 #ifdef __PLATFORM_WIN32__
 #ifndef usleep
-  #define usleep(x) Sleep( (x / 1000 <= 0 ? 1 : x / 1000) )
-#endif
+  #ifndef __CHUNREAL_ENGINE__
+    #define usleep(x) Sleep((x / 1000 <= 0 ? 1 : x / 1000) )
+  #else
+    // 1.5.0.0 (ge) | #chunreal
+    #define usleep(x) FPlatformProcess::Sleep( x/1000000.0f <= 0 ? .001 : x/1000000.0f );
+  #endif // #ifndef __UNREAL_ENGINE__
+#endif // #ifndef usleep
 // 1.4.2.0 (ge and spencer) | added for legacy windows, as part of switch to snprintf
 // https://stackoverflow.com/questions/2915672/snprintf-and-visual-studio-2010
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -205,7 +211,7 @@ typedef struct { SAMPLE re ; SAMPLE im ; } t_CKCOMPLEX_SAMPLE;
 #pragma warning (disable : 4244)  // truncation
 #pragma warning (disable : 4068)  // unknown pragma
 #pragma warning (disable : 4018)  // signed/unsigned mismatch
-#endif
+#endif // #ifdef __PLATFORM_WIN32__
 
 #ifdef __CHIP_MODE__
 #define __DISABLE_MIDI__

@@ -95,7 +95,7 @@ t_CKBOOL  stk_detach( Chuck_Carrier * carrier );
 // versions higher than 4.1.2 and replaced with the variable
 // "StkFloat".
 //typedef double StkFloat;
-//#if defined(__WINDOWS_DS__) || defined(__WINDOWS_ASIO__)
+//#if defined(__PLATFORM_WIN32__) || 
 //  #pragma deprecated(MY_FLOAT)
 //#else
 //  typedef StkFloat MY_FLOAT __attribute__ ((deprecated));
@@ -250,7 +250,7 @@ typedef double FLOAT64;
 #if defined(__WINDOWS_PTHREAD__)
   #define __OS_WINDOWS_CYGWIN__
   #define __STK_REALTIME__
-#elif defined(__WINDOWS_DS__) || defined(__WINDOWS_ASIO__)
+#elif defined(__PLATFORM_WIN32__)
   #define __OS_WINDOWS__
   #define __STK_REALTIME__
 #elif defined(__PLATFORM_LINUX__)
@@ -497,10 +497,9 @@ class Instrmnt : public Stk
   virtual void controlChange(int number, MY_FLOAT value);
 
 public: // SWAP formerly protected
+  MY_FLOAT lastOutput;
   // chuck
   t_CKFLOAT m_frequency;
-
-  MY_FLOAT lastOutput;
 };
 
 
@@ -1131,7 +1130,7 @@ public:
     An StkError will be thrown if the file is not found, its format is
     unknown, or a read error occurs.
   */
-  WvIn( const char *fileName, bool raw = FALSE, bool doNormalize = TRUE, bool generate=true );
+  WvIn( const char *fileName, bool raw = FALSE, bool doNormalize = TRUE, bool generate = TRUE );
 
   //! Class destructor.
   virtual ~WvIn();
@@ -1141,7 +1140,7 @@ public:
     An StkError will be thrown if the file is not found, its format is
     unknown, or a read error occurs.
   */
-  virtual void openFile( const char *fileName, bool raw = FALSE, bool doNormalize = TRUE, bool generate = true );
+  virtual void openFile( const char *fileName, bool raw = FALSE, bool doNormalize = TRUE, bool generate = TRUE );
 
   //! If a file is open, close it.
   void closeFile(void);
@@ -1257,7 +1256,10 @@ public: // SWAP formerly protected
 
   char msg[STK_MSG_BUF_LENGTH];
   // char m_filename[STK_MSG_BUF_LENGTH]; // chuck data
-  Chuck_String str_filename; // chuck data
+  // Chuck_String str_filename; // chuck data
+  // NOTE: all Chuck_Objects needs heap allocation using 'new'
+  // since reference counting automatically calls 'delete'
+  std::string str_filename;
   FILE *fd;
   MY_FLOAT *data;
   MY_FLOAT *lastOutput;
@@ -1275,6 +1277,7 @@ public: // SWAP formerly protected
   MY_FLOAT gain;
   MY_FLOAT time;
   MY_FLOAT rate;
+  MY_FLOAT scaleToOne;
 public:
   bool m_loaded;
 };
@@ -1587,7 +1590,6 @@ class FM : public Instrmnt
   MY_FLOAT __FM_gains[100];
   MY_FLOAT __FM_susLevels[16];
   MY_FLOAT __FM_attTimes[32];
-
 };
 
 #endif
@@ -5195,7 +5197,7 @@ class Sitar : public Instrmnt
     The user is responsible for checking the values
     returned by the read/write methods.  Values
     less than or equal to zero indicate a closed
-    or lost connection or the occurence of an error.
+    or lost connection or the occurrence of an error.
 
     by Perry R. Cook and Gary P. Scavone, 1995 - 2002.
 */
@@ -5726,10 +5728,14 @@ class WvOut : public Stk
   unsigned long counter;
   unsigned long totalCount;
   // char m_filename[1024];
-  Chuck_String str_filename;
-  t_CKUINT start;
+  // Chuck_String str_filename;
+  // NOTE: all Chuck_Objects needs heap allocation using 'new'
+  // since reference counting automatically calls 'delete'
+  std::string str_filename;
   // char autoPrefix[1024];
-  Chuck_String autoPrefix;
+  // Chuck_String autoPrefix;
+  std::string autoPrefix;
+  t_CKUINT start;
   t_CKUINT flush;
   t_CKFLOAT fileGain;
 
@@ -5978,7 +5984,10 @@ public: // SWAP formerly protected
   FormSwep  *filters[4];
   OnePole  *onepole;
   OneZero  *onezero;
-  Chuck_String str_phoneme; // chuck data
+  // Chuck_String str_phoneme; // chuck data
+  // NOTE: all Chuck_Objects needs heap allocation using 'new'
+  // since reference counting automatically calls 'delete'
+  std::string str_phoneme;
 };
 
 #endif
